@@ -123,12 +123,40 @@ function RepresentationController(config) {
     }
 
     function _updateRepresentation(currentRep) {
-        return new Promise((resolve, reject) => {
+            console.log('CE -- epc -- 1');
             const hasInitialization = currentRep.hasInitialization();
             const hasSegments = currentRep.hasSegments();
 
             // If representation has initialization and segments information we are done
             // otherwise, it means that a request has to be made to get initialization and/or segments information
+            const promises = [];
+
+            promises.push(segmentsController.updateInitData(currentRep, hasInitialization));
+            promises.push(segmentsController.updateSegmentData(currentRep, hasSegments));
+
+            return Promise.all(promises)
+                .then((data) => {
+                    if (data[0] && !data[0].error) {
+                        currentRep = _onInitLoaded(currentRep, data[0]);
+                    }
+                    if (data[1] && !data[1].error) {
+                        currentRep = _onSegmentsLoaded(currentRep, data[1]);
+                    }
+                    _setMediaFinishedInformation(currentRep);
+                    _onRepresentationUpdated(currentRep);
+                    return; 
+                })
+                .catch((e) => {
+                    throw e;
+                });
+    }
+
+    /*
+ function _updateRepresentation(currentRep) {
+        return new Promise((resolve, reject) => {
+            const hasInitialization = currentRep.hasInitialization();
+            const hasSegments = currentRep.hasSegments();
+
             const promises = [];
 
             promises.push(segmentsController.updateInitData(currentRep, hasInitialization));
@@ -151,6 +179,7 @@ function RepresentationController(config) {
                 });
         });
     }
+    */
 
     function _setMediaFinishedInformation(representation) {
         representation.mediaFinishedInformation = segmentsController.getMediaFinishedInformation(representation);

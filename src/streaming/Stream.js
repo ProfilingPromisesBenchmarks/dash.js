@@ -230,29 +230,28 @@ function Stream(config) {
     }
 
     function startPreloading(mediaSource, previousBuffers) {
-        return new Promise((resolve, reject) => {
+            console.log('CE -- epc -- 2');
 
             if (getPreloaded()) {
                 reject();
-                return;
+                return Promise.reject();
             }
 
             logger.info(`[startPreloading] Preloading next stream with id ${getId()}`);
             setPreloaded(true);
 
-            _commonMediaInitialization(mediaSource, previousBuffers)
+            return _commonMediaInitialization(mediaSource, previousBuffers)
                 .then(() => {
                     for (let i = 0; i < streamProcessors.length && streamProcessors[i]; i++) {
                         streamProcessors[i].setExplicitBufferingTime(getStartTime());
                         streamProcessors[i].getScheduleController().startScheduleTimer();
                     }
-                    resolve();
+                    return;
                 })
                 .catch(() => {
                     setPreloaded(false);
-                    reject();
+                    throw undefined;
                 });
-        });
     }
 
     /**
@@ -262,8 +261,49 @@ function Stream(config) {
      * @return {Promise<array>}
      * @private
      */
+/*
+    function _commonMediaInitialization(mediaSource, previousBufferSinks) {
+            console.log('CE -- epc -- 3');
+            checkConfig();
+
+            isUpdating = true;
+            addInlineEvents();
+
+
+            let element = videoModel.getElement();
+
+            MEDIA_TYPES.forEach((mediaType) => {
+                if (mediaType !== Constants.VIDEO || (!element || (element && (/^VIDEO$/i).test(element.nodeName)))) {
+                    _initializeMediaForType(mediaType, mediaSource);
+                }
+            });
+
+            return _createBufferSinks(previousBufferSinks)
+                .then((bufferSinks) => {
+                    isUpdating = false;
+
+                    if (streamProcessors.length === 0) {
+                        const msg = 'No streams to play.';
+                        errHandler.error(new DashJSError(Errors.MANIFEST_ERROR_ID_NOSTREAMS_CODE, msg, manifestModel.getValue()));
+                        logger.fatal(msg);
+                    } else {
+                        _checkIfInitializationCompleted();
+                    }
+
+                    // All mediaInfos for texttracks are added to the TextSourceBuffer by now. We can start creating the tracks
+                    textController.createTracks(streamInfo);
+
+                    return bufferSinks;
+                })
+                .catch((e) => {
+                    throw e;
+                });
+    }
+*/
+
     function _commonMediaInitialization(mediaSource, previousBufferSinks) {
         return new Promise((resolve, reject) => {
+            console.log('CE -- epc -- 3');
             checkConfig();
 
             isUpdating = true;
@@ -290,7 +330,6 @@ function Stream(config) {
                         _checkIfInitializationCompleted();
                     }
 
-                    // All mediaInfos for texttracks are added to the TextSourceBuffer by now. We can start creating the tracks
                     textController.createTracks(streamInfo);
 
                     resolve(bufferSinks);

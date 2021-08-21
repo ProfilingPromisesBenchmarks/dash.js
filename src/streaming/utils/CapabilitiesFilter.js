@@ -36,24 +36,23 @@ function CapabilitiesFilter() {
     }
 
     function filterUnsupportedFeatures(manifest) {
-        return new Promise((resolve) => {
+            console.log('CE -- epc -- 6');
             const promises = [];
 
             promises.push(_filterUnsupportedCodecs(Constants.VIDEO, manifest));
             promises.push(_filterUnsupportedCodecs(Constants.AUDIO, manifest));
 
-            Promise.all(promises)
+            return Promise.all(promises)
                 .then(() => {
                     if (settings.get().streaming.capabilities.filterUnsupportedEssentialProperties) {
                         _filterUnsupportedEssentialProperties(manifest);
                     }
                     _applyCustomFilters(manifest);
-                    resolve();
+                    return;
                 })
                 .catch(() => {
-                    resolve();
+                    return;
                 });
-        });
     }
 
 
@@ -71,11 +70,9 @@ function CapabilitiesFilter() {
     }
 
     function _filterUnsupportedAdaptationSetsOfPeriod(period, type) {
-        return new Promise((resolve) => {
-
+            console.log('CE -- epc -- 7');
             if (!period || !period.AdaptationSet_asArray || period.AdaptationSet_asArray.length === 0) {
-                resolve();
-                return;
+                return Promise.resolve();
             }
 
             const promises = [];
@@ -97,21 +94,17 @@ function CapabilitiesFilter() {
                         return supported;
                     });
 
-                    resolve();
+                    return;
                 })
                 .catch(() => {
-                    resolve();
+                    return;
                 });
-        });
-
     }
 
     function _filterUnsupportedRepresentationsOfAdaptation(as, type) {
-        return new Promise((resolve) => {
-
+            console.log('CE -- epc -- 8');
             if (!as.Representation_asArray || as.Representation_asArray.length === 0) {
-                resolve();
-                return;
+                return Promise.resolve();
             }
 
             const promises = [];
@@ -133,12 +126,11 @@ function CapabilitiesFilter() {
                         }
                         return supported[i];
                     });
-                    resolve();
+                    return;
                 })
                 .catch(() => {
-                    resolve();
+                    return;
                 });
-        });
     }
 
     function _createConfiguration(type, rep, codec) {

@@ -158,27 +158,25 @@ function BufferController(config) {
      * @return {object|null} SourceBufferSink
      */
     function createBufferSink(mediaInfo, oldBufferSinks = []) {
-        return new Promise((resolve, reject) => {
+            console.log('CE -- epc -- 4');
             if (!initCache || !mediaInfo || !mediaSource) {
-                resolve(null);
-                return;
+                return Promise.resolve(null);
             }
 
             const requiredQuality = abrController.getQualityFor(type, streamInfo.id);
             sourceBufferSink = SourceBufferSink(context).create({ mediaSource, textController });
-            _initializeSink(mediaInfo, oldBufferSinks, requiredQuality)
+            return _initializeSink(mediaInfo, oldBufferSinks, requiredQuality)
                 .then(() => {
                     return updateBufferTimestampOffset(_getRepresentationInfo(requiredQuality));
                 })
                 .then(() => {
-                    resolve(sourceBufferSink);
+                    return sourceBufferSink;
                 })
                 .catch((e) => {
                     logger.fatal('Caught error on create SourceBuffer: ' + e);
                     errHandler.error(new DashJSError(Errors.MEDIASOURCE_TYPE_UNSUPPORTED_CODE, Errors.MEDIASOURCE_TYPE_UNSUPPORTED_MESSAGE + type));
-                    reject(e);
+                    throw e;
                 });
-        });
     }
 
     function _initializeSink(mediaInfo, oldBufferSinks, requiredQuality) {
@@ -849,21 +847,14 @@ function BufferController(config) {
     }
 
     function updateBufferTimestampOffset(representationInfo) {
-        return new Promise((resolve) => {
+        console.log('CE -- epc -- 5');
             if (!representationInfo || representationInfo.MSETimeOffset === undefined || !sourceBufferSink || !sourceBufferSink.updateTimestampOffset) {
-                resolve();
-                return;
+                return Promise.resolve();
             }
+
             // Each track can have its own @presentationTimeOffset, so we should set the offset
             // if it has changed after switching the quality or updating an mpd
-            sourceBufferSink.updateTimestampOffset(representationInfo.MSETimeOffset)
-                .then(() => {
-                    resolve();
-                })
-                .catch(() => {
-                    resolve();
-                });
-        });
+            return sourceBufferSink.updateTimestampOffset(representationInfo.MSETimeOffset)
 
     }
 
