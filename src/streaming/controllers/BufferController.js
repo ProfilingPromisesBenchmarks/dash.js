@@ -849,21 +849,32 @@ function BufferController(config) {
     }
 
     function updateBufferTimestampOffset(representationInfo) {
-        return new Promise((resolve) => {
-            if (!representationInfo || representationInfo.MSETimeOffset === undefined || !sourceBufferSink || !sourceBufferSink.updateTimestampOffset) {
-                resolve();
-                return;
-            }
+        console.log("*** EXECUTING updateBufferTimestampOffset");
+        // return new Promise((resolve) => {
+        //     if (!representationInfo || representationInfo.MSETimeOffset === undefined || !sourceBufferSink || !sourceBufferSink.updateTimestampOffset) {
+        //         resolve();
+        //         return;
+        //     }
+        //     // Each track can have its own @presentationTimeOffset, so we should set the offset
+        //     // if it has changed after switching the quality or updating an mpd
+        //     sourceBufferSink.updateTimestampOffset(representationInfo.MSETimeOffset)
+        //         .then(() => {
+        //             resolve();
+        //         })
+        //         .catch(() => {
+        //             resolve();
+        //         });
+        // });
+
+        if (!representationInfo || representationInfo.MSETimeOffset === undefined || !sourceBufferSink || !sourceBufferSink.updateTimestampOffset) {
+            return Promise.resolve();
+        } else {
             // Each track can have its own @presentationTimeOffset, so we should set the offset
             // if it has changed after switching the quality or updating an mpd
-            sourceBufferSink.updateTimestampOffset(representationInfo.MSETimeOffset)
-                .then(() => {
-                    resolve();
-                })
-                .catch(() => {
-                    resolve();
-                });
-        });
+            return sourceBufferSink.updateTimestampOffset(representationInfo.MSETimeOffset)
+                    .then(() => undefined)
+                    .catch(() => undefined);
+        }
 
     }
 
