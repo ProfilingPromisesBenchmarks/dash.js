@@ -36,24 +36,43 @@ function CapabilitiesFilter() {
     }
 
     function filterUnsupportedFeatures(manifest) {
-        return new Promise((resolve) => {
+        console.log("*** EXECUTING filterUnsupportedFeatures");
+        // return new Promise((resolve) => {
+        //     const promises = [];
+
+        //     promises.push(_filterUnsupportedCodecs(Constants.VIDEO, manifest));
+        //     promises.push(_filterUnsupportedCodecs(Constants.AUDIO, manifest));
+
+        //     Promise.all(promises)
+        //         .then(() => {
+        //             if (settings.get().streaming.capabilities.filterUnsupportedEssentialProperties) {
+        //                 _filterUnsupportedEssentialProperties(manifest);
+        //             }
+        //             _applyCustomFilters(manifest);
+        //             resolve();
+        //         })
+        //         .catch(() => {
+        //             resolve();
+        //         });
+        // });
+
             const promises = [];
 
             promises.push(_filterUnsupportedCodecs(Constants.VIDEO, manifest));
             promises.push(_filterUnsupportedCodecs(Constants.AUDIO, manifest));
 
-            Promise.all(promises)
+            return Promise.all(promises)
                 .then(() => {
                     if (settings.get().streaming.capabilities.filterUnsupportedEssentialProperties) {
                         _filterUnsupportedEssentialProperties(manifest);
                     }
                     _applyCustomFilters(manifest);
-                    resolve();
+                    return undefined;
                 })
                 .catch(() => {
-                    resolve();
+                    return undefined;
                 });
-        });
+
     }
 
 
